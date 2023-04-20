@@ -1,0 +1,6 @@
+Student,ID,SIS User ID,SIS Login ID
+"Lastname, Firstname",12345,1234567,xyz@ucsc.edu
+"Spoof, Test",54321,7654321,abc@ucsc.edu
+"Trial, A",15324,6572311,abcd@ucsc.edu
+"Hike, C",13524,1654321,abcde@ucsc.edu
+"Walk, D",11115,1111117,abcdef@ucsc.edu
