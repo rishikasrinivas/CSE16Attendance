@@ -15,7 +15,7 @@ class AttendanceCheck:
           host= "localhost",
           port=3306,
           user= "root",
-          password= "Krishna@2004!",
+          password= "yourpasswd",
           database = "Quizzes"
         )
     def closeConnection(self):
@@ -37,7 +37,7 @@ class AttendanceCheck:
             cursor.execute(global_wait_timeout)
             cursor.execute(global_interactive_timeout)
             cursor.execute(insert_new_student,(id,))
-            # cursor.execute("DELETE FROM Attendance")
+            #cursor.execute("DELETE FROM Attendance")
             self.connection.commit()
 
     def getStudentInfo(self, file):
@@ -75,10 +75,27 @@ class AttendanceCheck:
 
     def compareWithRoster(self,checkedInStudents, classRoster):
         loggedIn = []
+        classList = []
+        countCheckedIn = 0
+        countClass = 0
+        absent = []
         with open(checkedInStudents, "r") as f:
             update = f.readlines()
-            loggedIn.append(update)
-        print(loggedIn)
+            for i in update:
+                if countCheckedIn > 0:
+                    loggedIn.append(i.strip())
+                countCheckedIn += 1
+        with open(classRoster, "r") as f1:
+            update = f1.readlines()
+            for i in update:
+                if countClass > 0:
+                    classList.append(i.strip().split(",")[2])
+                countClass += 1
+
+        for i in loggedIn:
+            if i not in classList:
+                absent.append(i)
+        return absent
 
     def gapBetweenEntries(self, curTime, lastTime):
         if (abs(curTime -lastTime)).total_seconds() > 60:
@@ -87,8 +104,7 @@ class AttendanceCheck:
 def main():
     file = "AttendanceSheet.txt"
     a = AttendanceCheck()
-    count = 0
-    empty = 0
+    a.connectToDatabase()
     while not a.gapBetweenEntries(a.now, a.lasttime):
         #check cur time
         if not a.isEmpty(file):
@@ -103,5 +119,5 @@ def main():
         print("going to bed")
         time.sleep(180)
         print("waking up")
-    a.compareWithRoster('AttendanceLogIDs.txt', 'mockSheet.dat')
+    list_of_now_show = a.compareWithRoster('AttendanceLogIDs.txt', 'mockSheet.dat')
 main()
