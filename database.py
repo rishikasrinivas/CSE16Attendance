@@ -104,20 +104,10 @@ class AttendanceCheck:
 def main():
     file = "AttendanceSheet.txt"
     a = AttendanceCheck()
-    a.connectToDatabase()
-    while not a.gapBetweenEntries(a.now, a.lasttime):
-        #check cur time
-        if not a.isEmpty(file):
-            a.now = datetime.now()
-            a.lasttime = datetime.now()
-            a.connectToDatabase()
-            print("updating database")
-            a.getStudentInfo(file)
-            a.closeConnection()
-        else:
-            a.now = datetime.now()
-        print("going to bed")
-        time.sleep(180)
-        print("waking up")
+    if not a.isEmpty(file):
+        a.connectToDatabase()
+        print("updating database")
+        a.getStudentInfo(file)
+        a.closeConnection()
     list_of_now_show = a.compareWithRoster('AttendanceLogIDs.txt', 'mockSheet.dat')
 main()
