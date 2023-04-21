@@ -1,12 +1,14 @@
 import configparser
 import mysql.connector
 import time
-import difflib
-import re
+from datetime import datetime
 class AttendanceCheck:
     def __init__(self):
         self.lineNum = 1
         self.connection=None
+        self.keepRunning = True
+        self.lasttime = datetime.now()
+        self.now = datetime.now()
 
     def connectToDatabase(self):
         self.connection = mysql.connector.connect(
@@ -42,7 +44,8 @@ class AttendanceCheck:
         with open(file, "r") as f:
             for index, line in enumerate(f):
                 if index > 0:
-                    self.insertData(line)
+                    trunc = str(line)[6:13]
+                    self.insertData(trunc)
 
         self.clearFile(file)
 
@@ -77,26 +80,28 @@ class AttendanceCheck:
             loggedIn.append(update)
         print(loggedIn)
 
+    def gapBetweenEntries(self, curTime, lastTime):
+        if (abs(curTime -lastTime)).total_seconds() > 60:
+            return True
+        return False
 def main():
     file = "AttendanceSheet.txt"
     a = AttendanceCheck()
-    interval = 1
-    lasttime = time.time()
     count = 0
     empty = 0
-    a.connectToDatabase()
-    while True:
+    while not a.gapBetweenEntries(a.now, a.lasttime):
         #check cur time
-        now = time.time()
-        if (abs(now - lasttime)) > interval:
-            if not a.isEmpty(file):
-                print("updating database")
-                a.getStudentInfo(file)
-            else:
-                empty += 1
-            lasttime = now
-        if empty ==2:
-            break
-    a.closeConnection()
-    #a.compareWithRoster('AttendanceLog.dat', 'AttendanceSheet.dat')
+        if not a.isEmpty(file):
+            a.now = datetime.now()
+            a.lasttime = datetime.now()
+            a.connectToDatabase()
+            print("updating database")
+            a.getStudentInfo(file)
+            a.closeConnection()
+        else:
+            a.now = datetime.now()
+        print("going to bed")
+        time.sleep(180)
+        print("waking up")
+    a.compareWithRoster('AttendanceLogIDs.txt', 'mockSheet.dat')
 main()
