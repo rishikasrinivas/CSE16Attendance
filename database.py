@@ -92,8 +92,8 @@ class AttendanceCheck:
                     classList.append(i.strip().split(",")[2])
                 countClass += 1
 
-        for i in loggedIn:
-            if i not in classList:
+        for i in classList:
+            if i not in loggedIn:
                 absent.append(i)
         return absent
 
@@ -104,10 +104,11 @@ class AttendanceCheck:
 def main():
     file = "AttendanceSheet.txt"
     a = AttendanceCheck()
-    if not a.isEmpty(file):
+    '''if not a.isEmpty(file):
         a.connectToDatabase()
         print("updating database")
         a.getStudentInfo(file)
-        a.closeConnection()
-    list_of_now_show = a.compareWithRoster('AttendanceLogIDs.txt', 'mockSheet.dat')
+        a.closeConnection()'''
+    list_of_now_show = a.compareWithRoster('ProcessID.txt', 'mockSheet.txt')
+    print(list_of_now_show)
 main()

@@ -4,3 +4,4 @@ Student,ID,SIS User ID,SIS Login ID
 "Trial, A",15324,6572311,abcd@ucsc.edu
 "Hike, C",13524,1654321,abcde@ucsc.edu
 "Walk, D",11115,1111117,abcdef@ucsc.edu
+"Walk, D",1944364,1111117,abcdef@ucsc.edu
