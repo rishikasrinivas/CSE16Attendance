@@ -1,7 +1,8 @@
 import configparser
 import mysql.connector
 import time
-
+import difflib
+import re
 class AttendanceCheck:
     def __init__(self):
         self.lineNum = 1
@@ -18,9 +19,9 @@ class AttendanceCheck:
     def closeConnection(self):
         self.connection.close()
 
-    def insertData(self,id,first_name,last_name):
+    def insertData(self,id):
         cursor = self.connection.cursor(buffered=True)
-        insert_new_student = ("INSERT IGNORE INTO Attendance (ID, LAST_NAME, FIRST_NAME) VALUES (%s, %s, %s)")
+        insert_new_student = ("INSERT IGNORE INTO Attendance (ID) VALUES (%s)")
         if self.connection.is_connected():
             db_Info =  self.connection.get_server_info()
             print("Connected to MySQL database... MySQL Server version on ", db_Info)
@@ -33,7 +34,7 @@ class AttendanceCheck:
             cursor.execute(global_connect_timeout)
             cursor.execute(global_wait_timeout)
             cursor.execute(global_interactive_timeout)
-            cursor.execute(insert_new_student,(id,last_name,first_name))
+            cursor.execute(insert_new_student,(id,))
             # cursor.execute("DELETE FROM Attendance")
             self.connection.commit()
 
@@ -41,8 +42,7 @@ class AttendanceCheck:
         with open(file, "r") as f:
             for index, line in enumerate(f):
                 if index > 0:
-                    lines = line.split(",")
-                    self.insertData(lines[0], lines[1],lines[2])
+                    self.insertData(line)
 
         self.clearFile(file)
 
@@ -58,7 +58,7 @@ class AttendanceCheck:
             f.seek(1)
             f.truncate()
         with open(file, "w") as f1:
-            f1.write("ID,LAST_NAME,FIRST_NAME")
+            f1.write("ID")
 
 
     def getLineFromFile(self, file):
@@ -70,8 +70,15 @@ class AttendanceCheck:
                 if i == self.lineNum:
                     return line
 
+    def compareWithRoster(self,checkedInStudents, classRoster):
+        loggedIn = []
+        with open(checkedInStudents, "r") as f:
+            update = f.readlines()
+            loggedIn.append(update)
+        print(loggedIn)
+
 def main():
-    file = "AttendanceSheet.dat"
+    file = "AttendanceSheet.txt"
     a = AttendanceCheck()
     interval = 1
     lasttime = time.time()
@@ -82,13 +89,14 @@ def main():
         #check cur time
         now = time.time()
         if (abs(now - lasttime)) > interval:
-            if not a.isEmpty("AttendanceSheet.dat"):
+            if not a.isEmpty(file):
                 print("updating database")
                 a.getStudentInfo(file)
             else:
                 empty += 1
             lasttime = now
-        if empty == 5:
+        if empty ==2:
             break
     a.closeConnection()
+    #a.compareWithRoster('AttendanceLog.dat', 'AttendanceSheet.dat')
 main()
