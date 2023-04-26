@@ -1,4 +1,5 @@
 class ProcessID:
+    # removes noise from ID scan
     def removeBackground(self,file, writeFile):
        with open(file, "r") as f:
            with open(writeFile, "a") as f1:
@@ -6,6 +7,7 @@ class ProcessID:
                 if index > 0:
                     trunc = str(line)[6:13]
                     f1.write(trunc)
+
     def compareWithRoster(self,checkedInStudents, classRoster):
         loggedIn = []
         classList = []
@@ -37,7 +39,8 @@ class ProcessID:
             for i in ids:
                 for j in lines:
                     if j.strip().split(",")[0] == i:
-                        absent.append([j.strip().split(",")[0], j.strip().split(",")[1], j.strip().split(",")[3]])
+                        absent.append([j.strip().split(",")[0], j.strip().split(","
+                                                                                "")[1], j.strip().split(",")[3]])
         return absent
 
 p = ProcessID()
