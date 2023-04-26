@@ -1,4 +1,4 @@
-import configparser
+# Uses a database to store scanned ID's
 import mysql.connector
 import time
 from datetime import datetime
@@ -104,20 +104,17 @@ class AttendanceCheck:
 def main():
     file = "AttendanceSheet.txt"
     a = AttendanceCheck()
-    '''while not a.gapBetweenEntries(a.now, a.lasttime):
+    while not a.gapBetweenEntries(a.now, a.lasttime):
         #check cur time
         if not a.isEmpty(file):
             a.now = datetime.now()
             a.lasttime = datetime.now()
             a.connectToDatabase()
-            print("updating database")
             a.getStudentInfo(file)
             a.closeConnection()
         else:
             a.now = datetime.now()
-        print("going to bed")
         time.sleep(180)
-        print("waking up")'''
     list_of_now_show = a.compareWithRoster('ProcessID.txt', 'mockSheet.txt')
     print(list_of_now_show)
 main()
