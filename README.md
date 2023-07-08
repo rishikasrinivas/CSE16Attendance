@@ -11,10 +11,8 @@ To do a un-moderated scan (leaving it open for periodic scans):
   Install MySQL Workbench:
   
   Click '+' next to MySQL Connections to create a connection
-  
-      - Can leave name as default name: 'root'
-        
-      - Press 'Test Connection'
+      1) Can leave name as default name: 'root'
+      2) Press 'Test Connection'
         
   Once you're in your connection go to the schema tab on the left
   
