@@ -12,9 +12,9 @@ To do a un-moderated scan (leaving it open for periodic scans):
   
   Click '+' next to MySQL Connections to create a connection
   
-      Can leave name as default name: 'root'
+      - Can leave name as default name: 'root'
         
-      Press 'Test Connection'
+      - Press 'Test Connection'
         
   Once you're in your connection go to the schema tab on the left
   
