@@ -23,7 +23,7 @@ class AttendanceCheck:
 
     def insertData(self,id):
         cursor = self.connection.cursor(buffered=True)
-        insert_new_student = ("INSERT IGNORE INTO Attendance (ID) VALUES (%s)")
+        insert_new_student = ("INSERT INTO Attendance (ID) VALUES (%s)")
         if self.connection.is_connected():
             db_Info =  self.connection.get_server_info()
             print("Connected to MySQL database... MySQL Server version on ", db_Info)
@@ -37,8 +37,10 @@ class AttendanceCheck:
             cursor.execute(global_wait_timeout)
             cursor.execute(global_interactive_timeout)
             cursor.execute(insert_new_student,(id,))
-            #cursor.execute("DELETE FROM Attendance")
             self.connection.commit()
+    def clear(self):
+        cursor = self.connection.cursor(buffered=True)
+        cursor.execute("DELETE FROM Attendance")
 
     def getStudentInfo(self, file):
         with open(file, "r") as f:
@@ -110,6 +112,9 @@ def main():
             a.now = datetime.now()
             a.lasttime = datetime.now()
             a.connectToDatabase()
+            delete = input("Delete entries? Y/N")
+            if "y" in delete.lower():
+                a.clear()
             a.getStudentInfo(file)
             a.closeConnection()
         else:
