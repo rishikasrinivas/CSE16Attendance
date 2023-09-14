@@ -9,6 +9,8 @@ class AttendanceCheck:
         self.keepRunning = True
         self.lasttime = datetime.now()
         self.now = datetime.now()
+        self.roster = []
+        self.cols = []
 
     def connectToDatabase(self):
         self.connection = mysql.connector.connect(
@@ -20,10 +22,17 @@ class AttendanceCheck:
         )
     def closeConnection(self):
         self.connection.close()
-
-    def insertData(self,id):
+    def getRows(self):
         cursor = self.connection.cursor(buffered=True)
-        insert_new_student = ("INSERT INTO Attendance (ID) VALUES (%s)")
+        if self.connection.is_connected():
+            data = cursor.execute("SELECT * FROM Attendance")
+            for row in cursor.description:
+                self.cols.append(row[0])
+    def insertStudent(self,id):
+        cursor = self.connection.cursor(buffered=True)
+
+        #ADD ALL COLUMNS manually
+        insert_new_student = "INSERT INTO Attendance (ID, Quiz1) VALUES (%s,%s)"
         if self.connection.is_connected():
             db_Info =  self.connection.get_server_info()
             print("Connected to MySQL database... MySQL Server version on ", db_Info)
@@ -36,20 +45,53 @@ class AttendanceCheck:
             cursor.execute(global_connect_timeout)
             cursor.execute(global_wait_timeout)
             cursor.execute(global_interactive_timeout)
-            cursor.execute(insert_new_student,(id,))
+            print(id)
+            cursor.execute(insert_new_student, (id, 0))
+           
             self.connection.commit()
+    def updateData(self,quizNum, id, atten):
+        cursor = self.connection.cursor(buffered=True)
+        update_data = """UPDATE Attendance SET %s = '%s' WHERE ID = %s""" %(quizNum,atten,id)
+
+        if self.connection.is_connected():
+            db_Info =  self.connection.get_server_info()
+            print("Connected to MySQL database... MySQL Server version on ", db_Info)
+
+            # global connection timeout arguments
+            global_connect_timeout = 'SET GLOBAL connect_timeout=180'
+            global_wait_timeout = 'SET GLOBAL connect_timeout=180'
+            global_interactive_timeout = 'SET GLOBAL connect_timeout=180'
+
+            cursor.execute(global_connect_timeout)
+            cursor.execute(global_wait_timeout)
+            cursor.execute(global_interactive_timeout)
+            cursor.execute(update_data)
+            self.connection.commit()
+
     def clear(self):
         cursor = self.connection.cursor(buffered=True)
         cursor.execute("DELETE FROM Attendance")
+        self.connection.commit()
 
-    def getStudentInfo(self, file):
-        with open(file, "r") as f:
+    def getStudentInfo(self, roster_file):
+        with open(roster_file, "r") as f:
             for index, line in enumerate(f):
                 if index > 0:
-                    trunc = str(line)[6:13]
-                    self.insertData(trunc)
+                    trunc = str(line)[4:9]
+                    if trunc not in self.roster:
+                        self.insertStudent(trunc)
 
-        self.clearFile(file)
+                        if roster_file == 'mockSheet.txt':
+                            self.roster.append(trunc)
+
+    def getAttendance(self, scanned_file):
+        with open(scanned_file, "r") as f:
+            for index, line in enumerate(f):
+                if index>0:
+                    stud_id = str(line)[6:13]
+                    print("Stud ", stud_id)
+                    #id = self.selectrow(stud_id)
+                    self.updateData("Quiz1", stud_id, "p")
 
     def isEmpty(self,file):
         with open(file, "r") as f:
@@ -84,6 +126,7 @@ class AttendanceCheck:
         with open(checkedInStudents, "r") as f:
             update = f.readlines()
             for i in update:
+                i = i[6:13]
                 if countCheckedIn > 0:
                     loggedIn.append(i.strip())
                 countCheckedIn += 1
@@ -104,10 +147,15 @@ class AttendanceCheck:
             return True
         return False
 def main():
+    roster = "mockSheet.txt"
     file = "AttendanceSheet.txt"
     a = AttendanceCheck()
-    while not a.gapBetweenEntries(a.now, a.lasttime):
+    #while not a.gapBetweenEntries(a.now, a.lasttime):
         #check cur time
+    setup = False
+    if setup:
+        a.getStudentInfo(roster)
+    else:
         if not a.isEmpty(file):
             a.now = datetime.now()
             a.lasttime = datetime.now()
@@ -115,11 +163,12 @@ def main():
             delete = input("Delete entries? Y/N")
             if "y" in delete.lower():
                 a.clear()
-            a.getStudentInfo(file)
+                return
+           # a.getStudentInfo(roster)
+            a.getRows()
+            a.getAttendance(file)
             a.closeConnection()
-        else:
-            a.now = datetime.now()
-        time.sleep(180)
-    list_of_now_show = a.compareWithRoster('ProcessID.txt', 'mockSheet.txt')
+
+    list_of_now_show = a.compareWithRoster('AttendanceSheet.txt', 'mockSheet.txt')
     print(list_of_now_show)
 main()
