@@ -117,6 +117,14 @@ class AttendanceCheck:
                 if i == self.lineNum:
                     return line
 
+    def getAbsent(self, quizNum):
+        cursor = self.connection.cursor(buffered=True)
+        update_data = """SELECT * FROM Attendance WHERE %s = %s""" %(quizNum, 0)
+        cursor.execute(update_data)
+        for i in cursor.fetchall():
+            print(i[0])
+
+
     def compareWithRoster(self,checkedInStudents, classRoster):
         loggedIn = []
         classList = []
@@ -164,11 +172,10 @@ def main():
             if "y" in delete.lower():
                 a.clear()
                 return
-           # a.getStudentInfo(roster)
             a.getRows()
             a.getAttendance(file)
             a.closeConnection()
-
-    list_of_now_show = a.compareWithRoster('AttendanceSheet.txt', 'mockSheet.txt')
-    print(list_of_now_show)
+    a.connectToDatabase()
+    a.getAbsent("Quiz1")
+    a.closeConnection()
 main()
